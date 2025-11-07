@@ -1,16 +1,15 @@
 #pragma once
-
 #include <windows.h>
 #include <activeds.h>
 
-
 //MSVCRT
-WINBASEAPI wchar_t *__cdecl MSVCRT$wcscat_s(wchar_t *strDestination, size_t numberOfElements, const wchar_t *strSource);
-WINBASEAPI errno_t __cdecl MSVCRT$wcscpy_s(wchar_t *_Dst, rsize_t _DstSize, const wchar_t *_Src);
+WINBASEAPI wchar_t* __cdecl MSVCRT$wcscat_s(wchar_t* _strDestination, size_t numberOfElements, const wchar_t *strSource);
+WINBASEAPI errno_t __cdecl MSVCRT$wcscpy_s(wchar_t* _Dst, rsize_t DstSize, const wchar_t* _Src);
 WINBASEAPI size_t __cdecl MSVCRT$wcslen(const wchar_t *_Str);
 WINBASEAPI void __cdecl MSVCRT$memset(void *dest, int c, size_t count);
 WINBASEAPI void *__cdecl MSVCRT$srand(unsigned int seed);
 WINBASEAPI int __cdecl MSVCRT$rand( void );
+WINBASEAPI wchar_t* __cdecl MSVCRT$wcschr(const wchar_t *_Str, wchar_t _Ch);
 
 //KERNEL32
 WINBASEAPI DWORD WINAPI KERNEL32$GetTickCount(VOID);
@@ -31,19 +30,19 @@ DECLSPEC_IMPORT void WINAPI OLEAUT32$VariantInit(VARIANTARG *pvarg);
 DECLSPEC_IMPORT void WINAPI OLEAUT32$VariantClear(VARIANTARG *pvarg);
 
 //NETAPI32
-DECLSPEC_IMPORT DWORD WINAPI NETAPI32$DsGetDcNameW(LPCWSTR ComputerName, LPCWSTR DomainName, GUID *DomainGuid, LPCWSTR SiteName, ULONG Flags, PDOMAIN_CONTROLLER_INFOW *DomainControllerInfo);
+DECLSPEC_IMPORT DWORD WINAPI NETAPI32$DsGetDcNameW(LPCWSTR ComputerName, LPCWSTR DomainName, GUID* _DomainGuid, LPCWSTR SiteName, ULONG Flags, PDOMAIN_CONTROLLER_INFOW* DomainControllerInfo);
 DECLSPEC_IMPORT DWORD WINAPI NETAPI32$NetApiBufferFree(LPVOID Buffer);
 
 //ACTIVEDS
 typedef HRESULT (WINAPI *_ADsOpenObject)(
-	LPCWSTR lpszPathName, 
-	LPCWSTR lpszUserName, 
-	LPCWSTR lpszPassword, 
-	DWORD dwReserved, 
-	REFIID riid, 
-	void **ppObject
-	);
+    LPCWSTR lpszPathName,
+    LPCWSTR lpszUserName,
+    LPCWSTR lpszPassword,
+    DWORD dwReserved,
+    REFIID riid,
+    void **ppObject
+);
 
 typedef BOOL (WINAPI *_FreeADsMem)(
-	LPVOID pMem
-	);
+    LPVOID pMem
+);

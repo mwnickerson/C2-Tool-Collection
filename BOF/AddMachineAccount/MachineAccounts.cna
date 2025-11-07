@@ -6,8 +6,16 @@ beacon_command_register("GetMachineAccountQuota", "Read the MachineAccountQuota 
     "Use Active Directory Service Interfaces (ADSI) to read the ms-DS-MachineAccountQuota value from AD.\n");
 
 beacon_command_register("AddMachineAccount", "Add a computer account to the Active Directory domain.",
-    "Synopsis: AddMachineAccount [Computername] [Password <Optional>]\n\n" .
-    "Use Active Directory Service Interfaces (ADSI) to add a computer account to AD.\n");
+    "Synopsis: AddMachineAccount [Computername] [Password <Optional>] [DomainController <Optional>]\n\n" .
+    "Use Active Directory Service Interfaces (ADSI) to add a computer account to AD.\n" .
+    "Arguments:\n" .
+    "  Computername      - Name of the computer account to create (required)\n" .
+    "  Password          - Password for the account (optional, random if not specified)\n" .
+    "  DomainController  - Specific DC to target (optional, auto-discover if not specified)\n\n" .
+    "Examples:\n" .
+    "  AddMachineAccount TESTPC\n" .
+    "  AddMachineAccount TESTPC MyP@ssw0rd\n" .
+    "  AddMachineAccount TESTPC MyP@ssw0rd dc01.corp.local\n");
 
 beacon_command_register("DelMachineAccount", "Remove a computer account from the Active Directory domain.",
     "Synopsis: DelMachineAccount [Computername]\n\n" .
@@ -15,65 +23,62 @@ beacon_command_register("DelMachineAccount", "Remove a computer account from the
 
 alias GetMachineAccountQuota {
     $bid = $1;
-
+    
     # Read in the right BOF file
     $handle = openf(script_resource("GetMachineAccountQuota." . barch($bid) . ".o"));
     $data   = readb($handle, -1);
     closef($handle);
-
+    
     beacon_inline_execute($bid, $data, "go", $null);
 }
-
 alias AddMachineAccount {
     $bid = $1;
-
     $input = substr($0, 18);
     @args = split(' ', $input);
-
+    
     $accountname = @args[0];
     $password = @args[1];
-
+    $dc = @args[2];
+    
     if ($accountname eq "") {
         berror($bid, "Specify a computeraccount name");
         return;
     }
-
+    
     # Read in the right BOF file
     $handle = openf(script_resource("AddMachineAccount." . barch($bid) . ".o"));
     $data   = readb($handle, -1);
     closef($handle);
-
-    # Pack our arguments
-    if ($password eq "") {
-        $arg_data  = bof_pack($bid, "Z", $accountname);
-    }
-    else{
-        $arg_data  = bof_pack($bid, "ZZ", $accountname, $password);
-    }
-
+    
+    # Pack - always 3 Z strings (empty if not provided)
+    if ($password eq "") { $password = ""; }
+    if ($dc eq "") { $dc = ""; }
+    
+    $arg_data = bof_pack($bid, "ZZZ", $accountname, $password, $dc);
+    
     beacon_inline_execute($bid, $data, "go", $arg_data);
 }
 
+
 alias DelMachineAccount {
     $bid = $1;
-
     $input = substr($0, 18);
     @args = split(' ', $input);
-
+    
     $accountname = @args[0];
-
+    
     if ($accountname eq "") {
         berror($bid, "Specify a computeraccount name");
         return;
     }
-
+    
     # Read in the right BOF file
     $handle = openf(script_resource("DelMachineAccount." . barch($bid) . ".o"));
     $data   = readb($handle, -1);
     closef($handle);
-
+    
     # Pack our arguments
-    $arg_data  = bof_pack($bid, "Z", $accountname);
-
+    $arg_data = bof_pack($bid, "Z", $accountname);
+    
     beacon_inline_execute($bid, $data, "go", $arg_data);
 }
